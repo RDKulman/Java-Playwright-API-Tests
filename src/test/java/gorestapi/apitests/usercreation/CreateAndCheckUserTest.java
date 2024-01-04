@@ -16,6 +16,7 @@ import java.util.Map;
 
 import static gorestapi.accesses.Accesses.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CreateAndCheckUserTest extends Config {
 
@@ -47,7 +48,7 @@ public class CreateAndCheckUserTest extends Config {
 
         headers.put( "Authorization", AUTH_TYPE + " " + AUTH_TOKEN );
         userData.put( "name", "Kate Laswall" );
-        userData.put( "email", "laswall_12345@mail.com" );
+        userData.put( "email", "laswall_123456@mail.com" );
         userData.put( "gender", "female" );
         userData.put( "status", "active" );
 
@@ -56,14 +57,13 @@ public class CreateAndCheckUserTest extends Config {
                 .newContext( new APIRequest.NewContextOptions().setExtraHTTPHeaders( headers ) );
 
         APIResponse response = requestContext.post( URL_USERS, RequestOptions.create().setData( userData ) );
-
-        assertEquals( response.status(), 201 );
-        assertEquals( response.statusText(), "Created" );
-
         JsonNode responseJson = new ObjectMapper().readTree( response.body() );
 
         System.out.println( "Test processing is finished." );
         System.out.println( "Server response is " + responseJson.toPrettyString() );
+
+        assertEquals( response.status(), 201 );
+        assertEquals( response.statusText(), "Created" );
     }
 
     @Test
@@ -83,16 +83,34 @@ public class CreateAndCheckUserTest extends Config {
                 .newContext( new APIRequest.NewContextOptions().setExtraHTTPHeaders( headers ) );
 
         APIResponse response = requestContext.post( URL_USERS, RequestOptions.create().setData( testUser ) );
-
-        assertEquals( response.status(), 201 );
-        assertEquals( response.statusText(), "Created" );
-
         JsonNode responseJson = new ObjectMapper().readTree( response.body() );
 
         System.out.println( "Test processing is finished." );
         System.out.println( "Server response is " + responseJson.toPrettyString() );
 
+        assertEquals( response.status(), 201 );
+        assertEquals( response.statusText(), "Created" );
+    }
 
+    @Test
+    public void getUser() throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put( "Authorization", AUTH_TYPE + " " + AUTH_TOKEN );
+
+        requestContext = playwright
+                .request()
+                .newContext( new APIRequest.NewContextOptions().setExtraHTTPHeaders( headers ) );
+
+        APIResponse response = requestContext.get( URL_USERS, RequestOptions
+                .create()
+                .setQueryParam( "id", 5891826 ) );
+        JsonNode responseJson = new ObjectMapper().readTree( response.body() );
+
+        System.out.println( "Test processing is finished." );
+        System.out.println( "Server response is " + responseJson.toPrettyString() );
+
+        assertEquals( response.status(), 200 );
+        assertTrue( response.ok() );
     }
 
 }
